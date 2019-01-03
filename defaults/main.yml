@@ -1,0 +1,25 @@
+---
+
+# By default do not update OS
+packer_update_os: False
+
+# Comma seperated list of packages to be installed
+packer_install_packages: ""
+
+# Remove OpenSSH Host Keys to force new host SSH keys on first start
+packer_unique_host_ssh_key: True
+
+# Configure for Vagrant use
+packer_configure_vagrant: False
+
+# Install guest tools by default
+packer_install_guest_tools: True
+
+# Remove build tools after the guest tools are installed
+packer_remove_build_tools: True
+
+# Default to open-vm-tools supplied by the distribution
+packer_vmware_vm_tools: dist
+
+# Overwrite motd with image build date
+packer_configure_motd: True

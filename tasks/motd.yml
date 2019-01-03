@@ -1,0 +1,16 @@
+---
+
+  - name: Disable dynamic message of day (Debian)
+    lineinfile:
+      path: /etc/pam.d/sshd
+      regexp: "motd=/run/motd.dynamic"
+      line: "#session    optional     pam_motd.so  motd=/run/motd.dynamic"
+    when: ansible_os_family == 'Debian'
+
+  - name: Configure message of the day (RedHat/Debian)
+    template:
+      src: 'motd.j2'
+      dest: /etc/motd
+      owner: root
+      group: root
+      mode: 0644

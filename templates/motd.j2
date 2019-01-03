@@ -1,0 +1,4 @@
+----------------------------------------------------------------
+  {{ansible_distribution}} {{ansible_distribution_version}}{{ "built: ".rjust(65 - (ansible_distribution|length + ansible_distribution_version|length) - 16) + lookup('pipe','date +%Y-%m-%d') }}
+----------------------------------------------------------------
+

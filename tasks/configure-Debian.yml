@@ -1,0 +1,34 @@
+---
+
+  - name: Update all packages to the latest version (Debian)
+    apt:
+      upgrade: dist
+      update_cache: yes
+      cache_valid_time: 1800
+    when: packer_update_os == True or packer_update_os == "true" or packer_update_os == "yes"
+
+  - stat: path=/etc/rc.local
+    register: rc_local
+
+  - name: Regenerate OpenSSH Host Key at boot using rc.local (Debian)
+    lineinfile:
+      path: /etc/rc.local
+      insertbefore: exit*
+      line: test -f /etc/ssh/ssh_host_dsa_key || /usr/bin/ssh-keygen -A
+    when: rc_local.stat.exists == True and (packer_unique_host_ssh_key == True or packer_unique_host_ssh_key == "true" or packer_unique_host_ssh_key == "yes")
+
+  - name: Regenerate OpenSSH Host Key at boot using cron (Debian)
+    cron:
+      name: "Regenerate OpenSSH host key when missing"
+      special_time: reboot
+      job: "/usr/bin/test -f /etc/ssh/ssh_host_dsa_key || /usr/bin/ssh-keygen -A"
+    when: rc_local.stat.exists == False and (packer_unique_host_ssh_key == True or packer_unique_host_ssh_key == "true" or packer_unique_host_ssh_key == "yes")
+
+  - stat: path=/etc/apt/apt.conf.d/10periodic
+    register: periodic
+
+  - name: Disable periodic apt upgrades ny default (Debian)
+    lineinfile:
+      path: /etc/apt/apt.conf.d/10periodic
+      line: APT::Periodic::Enable "0";
+    when: periodic.stat.exists == True

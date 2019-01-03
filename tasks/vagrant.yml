@@ -1,0 +1,44 @@
+---
+
+# Create vagrant group
+- name: Add the vagrant group
+  group:
+    name: vagrant
+    state: present
+
+# Create vagrant user
+- name: Add the vagrant user
+  user:
+    name: vagrant
+    password: "$6$kwaVyX9n$PuWvS.cg1Qz43otDpIKoVcURk9yk5PwQRk6UkheOjvZ1tM5/FolYlET2n7.VRwvTFeX/eWFKY45FzqPtOBnC0."
+    group: vagrant
+    home: /home/vagrant
+    state: present
+    comment: vagrant
+
+# Vagrant SSH configuration.
+- name: Configure Vagrant .ssh directory
+  file:
+    path: /home/vagrant/.ssh
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: 0700
+
+- name: Get Vagrant's public key
+  get_url:
+    url: https://github.com/mitchellh/vagrant/raw/master/keys/vagrant.pub
+    dest: /home/vagrant/.ssh/authorized_keys
+    owner: vagrant
+    group: vagrant
+    mode: 0600
+
+- name: Allow password less sudo for vagrant
+  copy:
+    dest: "/etc/sudoers.d/vagrant"
+    mode: 0440
+    owner: root
+    group: root
+    content: |
+      %vagrant ALL=(ALL) NOPASSWD:ALL
+      Defaults:vagrant !requiretty

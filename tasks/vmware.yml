@@ -1,0 +1,8 @@
+---
+
+- name: Install open-vm-tools (Redhat/Debian)
+  package:
+    name: "open-vm-tools"
+  when: packer_vmware_vm_tools == "dist"
+
+## Todo, install VMWare tools (maybe sometime)

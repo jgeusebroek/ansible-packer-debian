@@ -1,0 +1,23 @@
+---
+
+  - name: Clean up yum (Redhat)
+    command: yum -y --enablerepo='*' clean all
+    tags: ['skip_ansible_lint']
+
+  - name: Remove RedHat interface persistence (step 1) (Redhat)
+    command: rm -f /etc/udev/rules.d/70-persistent-net.rules
+    tags: ['skip_ansible_lint']
+
+  - name: Remove RedHat interface persistence (step 2) (Redhat)
+    lineinfile:
+      dest: /etc/sysconfig/network-scripts/ifcfg-eth0
+      regexp: "{{ item }}"
+      state: absent
+    with_items:
+      - '^HWADDR'
+      - '^UUID'
+
+  - name: Clear machine ID
+    copy:
+      dest: "/etc/machine-id"
+      content: ""

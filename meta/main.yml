@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: Jeroen Geusebroek
+  description: Ansible role used to provision packer builds
+  license: "license (BSD, MIT)"
+  min_ansible_version: 2.5
+  platforms:
+  - name: EL
+    versions:
+        - all
+  - name: Debian
+    versions:
+        - all
+  - name: Ubuntu
+    versions:
+        - all
+  galaxy_tags: [ "packer", "cloud" ]

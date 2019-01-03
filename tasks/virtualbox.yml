@@ -1,0 +1,64 @@
+---
+
+- name: Ensure correct kernel headers are installed (Debian)
+  shell: "apt-get -y install linux-headers-$(uname -r)"
+  args:
+    warn: False
+  when: ansible_os_family == 'Debian'
+
+- name: Install required build packages for VirtualBox guest install (Debian)
+  package:
+    name: [ "build-essential", "dkms" ]
+  when: ansible_os_family == 'Debian'
+
+- name: Install required build packages for VirtualBox guest install (RedHat)
+  yum:
+    name: [ "gcc", "kernel-devel", "kernel-headers", "bzip2" ]
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Get VirtualBox version (Debian/RedHat)
+  shell: cat /home/vagrant/.vbox_version
+  register: virtualbox_version
+
+- name: Mount VirtualBox guest additions ISO (Debian/RedHat)
+  mount:
+    name: /tmp/vbox
+    src: "/home/vagrant/VBoxGuestAdditions_{{ virtualbox_version.stdout }}.iso"
+    opts: loop
+    state: mounted
+    fstype: iso9660
+
+- name: Run VirtualBox guest additions installation (Debian/RedHat)
+  shell: sh /tmp/vbox/VBoxLinuxAdditions.run
+  failed_when: false
+
+- name: Unmount VirtualBox guest additions ISO (Debian/RedHat)
+  mount:
+    name: /tmp/vbox
+    src: "/home/vagrant/VBoxGuestAdditions_{{ virtualbox_version.stdout }}.iso"
+    state: absent
+    fstype: iso9660
+
+- name: Delete VirtualBox guest additions ISO (Debian/RedHat)
+  file:
+    path: "/home/vagrant/VBoxGuestAdditions_{{ virtualbox_version.stdout }}.iso"
+    state: absent
+
+- name: Remove kernel headers installed for VirtualBox guest install (Debian)
+  shell: "apt-get -y purge linux-headers-$(uname -r)"
+  args:
+    warn: False
+  when: ansible_os_family == 'Debian' and (packer_remove_build_tools == True or packer_remove_build_tools == "true" or packer_remove_build_tools == "yes")
+
+- name: Remove required build packages for VirtualBox guest install (Debian)
+  apt:
+    name: [ "build-essential", "dkms" ]
+    purge: yes
+  when: ansible_os_family == 'Debian' and (packer_remove_build_tools == True or packer_remove_build_tools == "true" or packer_remove_build_tools == "yes")
+
+- name: Remove required build packages for VirtualBox guest install (RedHat)
+  yum:
+    name: [ "gcc", "kernel-devel", "kernel-headers", "dkms", "bzip2" ]
+    state: removed
+  when: ansible_os_family == 'RedHat' and (packer_remove_build_tools == True or packer_remove_build_tools == "true" or packer_remove_build_tools == "yes")

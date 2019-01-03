@@ -1,0 +1,85 @@
+---
+
+# Import OS specific tasks
+- import_tasks: configure-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- import_tasks: configure-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Configure SSH daemon (Redhat/Debian)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - regexp: '^UseDNS'
+      line: 'UseDNS no'
+    - regexp: '^GSSAPIAuthentication'
+      line: 'GSSAPIAuthentication no'
+
+- name: Remove 127.0.1.1 from /etc/hosts
+  lineinfile:
+    dest: "{{ item }}"
+    regexp: "^127.0.1.1"
+    state: absent
+  with_items:
+      - /etc/cloud/templates/hosts.debian.tmpl
+      - /etc/hosts
+
+- name: Record box build date
+  copy:
+    dest: "/etc/build_date"
+    mode: 0644
+    owner: root
+    group: root
+    content: "{{ ansible_date_time.date }}"
+
+- find:
+    paths: /etc/ssh
+    patterns: "*key*"
+  register: keys_to_delete
+  when: packer_unique_host_ssh_key == True or packer_unique_host_ssh_key == "true" or packer_unique_host_ssh_key == "yes"
+
+- name: Remove OpenSSH Host Keys so they are regenerated on first boot (Redhat/Debian)
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ keys_to_delete.files }}"
+  when: packer_unique_host_ssh_key == True or packer_unique_host_ssh_key == "true" or packer_unique_host_ssh_key == "yes"
+
+- name: Install requested packages (Redhat/Debian)
+  package:
+    name: "{{ packer_install_packages.split(',') }}"
+  when: packer_install_packages != ""
+
+# VMWare tools installation.
+- include_tasks: vmware.yml
+  when: ansible_virtualization_type == "VMware" and (packer_install_guest_tools == True or packer_install_guest_tools == "true" or packer_install_guest_tools == "yes")
+
+# VirtualBox tools installation.
+- name: Check if VirtualBox is running the guest VM.
+  stat: path=/home/vagrant/.vbox_version
+  register: virtualbox_check
+  when: packer_install_guest_tools == True or packer_install_guest_tools == "true" or packer_install_guest_tools == "yes"
+
+- include_tasks: virtualbox.yml
+  when: virtualbox_check.stat.exists and (packer_install_guest_tools == True or packer_install_guest_tools == "true" or packer_install_guest_tools == "yes")
+
+# Vagrant
+- import_tasks: vagrant.yml
+  when: packer_configure_vagrant == True or packer_configure_vagrant == "true" or packer_configure_vagrant == "yes"
+
+# Motd
+- import_tasks: motd.yml
+  when: packer_configure_motd == True
+  tags: motd
+
+# Cleanup
+
+- import_tasks: cleanup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- import_tasks: cleanup-RedHat.yml
+  when: ansible_os_family == 'RedHat'

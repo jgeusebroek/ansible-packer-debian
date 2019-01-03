@@ -1,0 +1,16 @@
+---
+
+  - name: Update all packages to the latest version (RedHat)
+    yum:
+      name: '*'
+      update_cache: yes
+      state: latest
+    when: packer_update_os == True or packer_update_os == "true" or packer_update_os == "yes"
+
+  # Fix slow DNS.
+  - name: Fix slow DNS (Redhat)
+    lineinfile:
+      dest: /etc/sysconfig/network
+      regexp: '^RES_OPTIONS'
+      line: 'RES_OPTIONS="single-request-reopen"'
+      state: present
