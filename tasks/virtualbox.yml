@@ -1,5 +1,10 @@
 ---
 
+- name: Ensure open-vm-tools are not installed on a VirtualBox guest (Debian/RedHat)
+  package:
+    name: [ "open-vm-tools" ]
+    state: absent
+
 - name: Ensure correct kernel headers are installed (Debian)
   shell: "apt-get -y install linux-headers-$(uname -r)"
   args:
