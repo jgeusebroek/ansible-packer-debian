@@ -18,7 +18,7 @@
 
 - name: Install required build packages for VirtualBox guest install (RedHat)
   yum:
-    name: [ "gcc", "kernel-devel", "kernel-headers", "bzip2" ]
+    name: [ "gcc", "kernel-devel", "kernel-headers", "bzip2", "tar" ]
     state: present
   when: ansible_os_family == 'RedHat'
 
