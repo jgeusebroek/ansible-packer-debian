@@ -18,7 +18,7 @@
 
 - name: Install required build packages for VirtualBox guest install (RedHat)
   yum:
-    name: [ "gcc", "kernel-devel", "kernel-headers", "bzip2", "tar" ]
+    name: [ "gcc", "kernel-devel", "kernel-headers", "bzip2", "tar", "elfutils-libelf-devel", "make" ]
     state: present
   when: ansible_os_family == 'RedHat'
 
@@ -64,6 +64,6 @@
 
 - name: Remove required build packages for VirtualBox guest install (RedHat)
   yum:
-    name: [ "gcc", "kernel-devel", "kernel-headers", "dkms", "bzip2" ]
+    name: [ "gcc", "kernel-devel", "kernel-headers", "dkms", "bzip2", "make", "elfutils-libelf-devel" ]
     state: removed
   when: ansible_os_family == 'RedHat' and (packer_remove_build_tools == True or packer_remove_build_tools == "true" or packer_remove_build_tools == "yes")
