@@ -19,9 +19,9 @@
 
   - name: Regenerate OpenSSH Host Key at boot using cron (Debian)
     cron:
-      name: "Regenerate OpenSSH host key when missing"
+      name: "Regenerate OpenSSH host key when missing and restart sshd"
       special_time: reboot
-      job: "/usr/bin/test -f /etc/ssh/ssh_host_dsa_key || /usr/bin/ssh-keygen -A"
+      job: "/usr/bin/test -f /etc/ssh/ssh_host_dsa_key || /usr/bin/ssh-keygen -A && systemctl restart sshd"
     when: rc_local.stat.exists == False and (packer_unique_host_ssh_key == True or packer_unique_host_ssh_key == "true" or packer_unique_host_ssh_key == "yes")
 
   - stat: path=/etc/apt/apt.conf.d/10periodic
