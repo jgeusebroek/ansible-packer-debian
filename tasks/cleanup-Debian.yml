@@ -8,21 +8,15 @@
 
   - name: Remove unneeded packages (by regex) (Debian)
     shell: "apt-get -y remove '.*-dev$'"
-    args:
-      warn: False
     changed_when: false
     tags: ['skip_ansible_lint']
 
   - name: Clean up leftover dhcp leases
     shell: "rm -f /var/lib/dhcp/*"
-    args:
-      warn: False
     tags: ['skip_ansible_lint']
 
   - name: Clean up apt (Debian)
     shell: "{{ item }}"
-    args:
-      warn: False
     changed_when: false
     with_items:
       - apt-get -y autoremove --purge
