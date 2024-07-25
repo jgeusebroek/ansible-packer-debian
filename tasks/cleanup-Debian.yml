@@ -6,11 +6,6 @@
       purge: yes
       state: absent
 
-  - name: Remove unneeded packages (by regex) (Debian)
-    shell: "apt-get -y remove '.*-dev$'"
-    changed_when: false
-    tags: ['skip_ansible_lint']
-
   - name: Clean up leftover dhcp leases
     shell: "rm -f /var/lib/dhcp/*"
     tags: ['skip_ansible_lint']
